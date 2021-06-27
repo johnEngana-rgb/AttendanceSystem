@@ -21,7 +21,7 @@ def attendancedb():
         first_name   VARCHAR(100) NOT NULL,
         last_name    VARCHAR(100) NOT NULL,
         year_level   VARCHAR(25) NOT NULL,
-        course_id    INTEGER NOT NULL,
+        course_id    VARCHAR(50) NOT NULL,
         PRIMARY KEY(student_id),
         FOREIGN KEY(course_id) REFERENCES course(course_id)
             );
@@ -114,13 +114,16 @@ def add_course():
 
 def add_attends():
     cursor.executemany("INSERT INTO attends VALUES(?,?,?,?,?,?)", many_attends)
-
 '''
+attendancedb()
 add_act()
 add_stud()
 add_course()
-add_attends()'''
+add_attends()
+'''
+
 #cursor.execute("SELECT* FROM students")
+
 
 print(cursor.fetchall())
 
