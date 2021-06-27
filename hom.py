@@ -14,11 +14,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(738, 705)
+        MainWindow.resize(767, 678)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.widget = QtWidgets.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(30, 80, 641, 441))
+        self.widget.setGeometry(QtCore.QRect(50, 70, 641, 501))
         self.widget.setStyleSheet("QWidget#widget{\n"
 "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.911, y2:1, stop:0 rgba(79, 255, 159, 255), stop:1 rgba(255, 255, 255, 255));\n"
 "    border-color: rgb(172, 172, 172);\n"
@@ -52,14 +52,22 @@ class Ui_MainWindow(object):
         font.setPointSize(28)
         font.setBold(False)
         font.setItalic(False)
-        font.setWeight(9)
+        font.setWeight(50)
         self.label.setFont(font)
         self.label.setStyleSheet("color:rgb(113, 113, 113)\n"
 "")
         self.label.setObjectName("label")
+        self.pushButton_3 = QtWidgets.QPushButton(self.widget)
+        self.pushButton_3.setGeometry(QtCore.QRect(210, 360, 231, 71))
+        font = QtGui.QFont()
+        font.setPointSize(17)
+        self.pushButton_3.setFont(font)
+        self.pushButton_3.setStyleSheet("color: rgb(255, 255, 255);\n"
+"background-color: rgb(113, 113, 113);")
+        self.pushButton_3.setObjectName("pushButton_3")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 738, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 767, 26))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -75,13 +83,4 @@ class Ui_MainWindow(object):
         self.pushButton.setText(_translate("MainWindow", "Create Activity"))
         self.pushButton_2.setText(_translate("MainWindow", "Start Attendance"))
         self.label.setText(_translate("MainWindow", "ATTENDANCE DATABSE SYSTEM"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+        self.pushButton_3.setText(_translate("MainWindow", "Add Student"))
