@@ -273,18 +273,28 @@ class AttendanceWin(QtWidgets.QMainWindow, Ui_A):
 class ActivityWin(QtWidgets.QMainWindow, Ui_act):
     def __init__(self):
         super().__init__()
+        print("pass")
         self.setupUi(self)
+        print("pass")
         self.show()
+        print("pass")
         self.load_activities()
+        print("pass")
         conn = sqlite3.connect('attendance.db')
         c = conn.cursor()
+        print("pass")
         self.pushButton_2.clicked.connect(self.home)
+        print("pass")
         self.pushButton_4.clicked.connect(self.add_student)
+        print("pass")
         self.pushButton_3.clicked.connect(self.attendance)
+        print("pass")
         self.add_btn()
+        print("pass")
         c.execute("SELECT* FROM activities ORDER BY activity_id ASC")
         act = c.fetchall()[-1][5]
-        self.label.setText()
+        self.label_2.setText("{}".format(act))
+        print("pass")
 
     # this code loads the activities table and displays the said activities
     def load_activities(self):
