@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import *
+from PyQt5.QtCore import QDateTime, QDate, QTime, Qt
 from PyQt5.QtGui import *
 import sqlite3
 from Main import Ui_A
@@ -155,10 +155,10 @@ class studentWin(QtWidgets.QMainWindow, Ui_Student_sheet):
         year = str(self.comboBox_2.currentText())
         course = str(self.comboBox.currentText())
         student_info = [(id, fname, lname, year, course)]
-        c.execute("INSERT INTO student VALUES (?,?,?,?,?)", student_info)
+        c.execute("INSERT INTO students VALUES (?,?,?,?,?)", student_info)
 
         # this code updates the table students in UI
-        result = c.execute("SELECT* FROM student")
+        result = c.execute("SELECT* FROM students")
 
         self.tableWidget.setRowCount(0)
         for row_number, row_data in enumerate(result):
@@ -170,11 +170,21 @@ class studentWin(QtWidgets.QMainWindow, Ui_Student_sheet):
 class AttendanceWin(QtWidgets.QMainWindow, Ui_A):
     def __init__(self):
         super().__init__()
+        conn = sqlite3.connect('attendance.db')
+        c = conn.cursor()
         self.setupUi(self)
         self.show()
         self.load_attendance()
         self.home_btn()
         self.add_btn()
+        self.confirm_btn()
+        c.execute("SELECT* FROM activities ORDER BY activity_id ASC")
+        act = c.fetchall()[-1][5]
+        self.label_2.setText("{}".format(act))
+
+        det_time = self.timeEdit.time()
+        time = det_time.currentTime()
+        self.timeEdit.setTime(time)
 
     def home_btn(self):
         self.pushButton_3.clicked.connect(self.home)
@@ -191,8 +201,8 @@ class AttendanceWin(QtWidgets.QMainWindow, Ui_A):
         conn = sqlite3.connect('attendance.db')
         c = conn.cursor()
 
-        result = c.execute("SELECT  students.student_id, students.first_name, students.last_name, students.course_id, "
-                           "students.year_level, attends.status, attends.attendance_time, attends.attendance_id FROM "
+        result = c.execute("SELECT students.student_id, students.first_name, students.last_name, students.course_id, "
+                           "students.year_level, attends.status, attends.attendance_time, attends.activity_id FROM "
                            "attends INNER JOIN students ON students.student_id = attends.student_id")
         self.tableWidget.setRowCount(0)
         for row_number, row_data in enumerate(result):
@@ -215,6 +225,50 @@ class AttendanceWin(QtWidgets.QMainWindow, Ui_A):
         conn.commit()
         conn.close()
 
+    def confirm_btn(self):
+        self.pushButton.clicked.connect(self.take_attendance)
+
+    def take_attendance(self):
+        conn = sqlite3.connect('attendance.db')
+        c = conn.cursor()
+        c.execute("SELECT* FROM activities ORDER BY activity_id ASC")
+        act = c.fetchall()[-1][5]
+        det_time = self.timeEdit.time()
+        times = det_time.currentTime()
+        time = times.toString()
+
+        get_date = self.calendarWidget.selectedDate().toString(QtCore.Qt.ISODate)
+        print(get_date)
+        status = self.comboBox_4.currentText()
+        student_id = self.lineEdit_8.text()
+        activity_id = act
+        print(activity_id)
+        attends = [(get_date, time, status, student_id, activity_id)]
+        print(attends)
+        conn = sqlite3.connect('attendance.db')
+        c = conn.cursor()
+        with conn:
+            c.executemany("INSERT INTO attends VALUES(?,?,?,?,?)", attends)
+        print('recorded')
+
+        conn.commit()
+        c.close()
+
+        conn = sqlite3.connect('attendance.db')
+        c = conn.cursor()
+
+        result = c.execute("SELECT attends.student_id, students.first_name, students.last_name, students.course_id, "
+                           "students.year_level, attends.status, attends.attendance_time, attends.activity_id FROM "
+                           "attends INNER JOIN students ON students.student_id = attends.student_id")
+
+        self.tableWidget.setRowCount(0)
+        for row_number, row_data in enumerate(result):
+            self.tableWidget.insertRow(row_number)
+            for column_number, data in enumerate(row_data):
+                self.tableWidget.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        conn.commit()
+        c.close()
+
 
 class ActivityWin(QtWidgets.QMainWindow, Ui_act):
     def __init__(self):
@@ -222,7 +276,15 @@ class ActivityWin(QtWidgets.QMainWindow, Ui_act):
         self.setupUi(self)
         self.show()
         self.load_activities()
-        self.home_btn()
+        conn = sqlite3.connect('attendance.db')
+        c = conn.cursor()
+        self.pushButton_2.clicked.connect(self.home)
+        self.pushButton_4.clicked.connect(self.add_student)
+        self.pushButton_3.clicked.connect(self.attendance)
+        self.add_btn()
+        c.execute("SELECT* FROM activities ORDER BY activity_id ASC")
+        act = c.fetchall()[-1][5]
+        self.label.setText()
 
     # this code loads the activities table and displays the said activities
     def load_activities(self):
@@ -236,8 +298,54 @@ class ActivityWin(QtWidgets.QMainWindow, Ui_act):
             for column_number, data in enumerate(row_data):
                 self.tableWidget.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
-    def home_btn(self):
-        self.pushButton_2.clicked.connect(self.main)
+    def add_btn(self):
+        self.pushButton.clicked.connect(self.add_act)
+
+    def add_act(self):
+        conn = sqlite3.connect('attendance.db')
+        c = conn.cursor()
+        name = self.lineEdit.text()
+        description = self.plainTextEdit.toPlainText()
+        self.get_date = self.dateEdit.date()
+        start_date = self.get_date.toString()
+        get_endDate = self.dateEdit_2.date()
+        end_date = get_endDate.toString()
+        locations = self.lineEdit_2.text()
+        c.execute("SELECT* FROM activities ORDER BY activity_id ASC")
+        act = c.fetchall()[-1][5]
+        activ = act + 1
+        print(activ)
+
+        activit = [(name, description, start_date, end_date, locations, activ)]
+        print(activit)
+
+        conn = sqlite3.connect('attendance.db')
+        c = conn.cursor()
+        with conn:
+            c.executemany("INSERT INTO activities VALUES(?,?,?,?,?,?)", activit)
+        conn.commit()
+        conn.close()
+        result = c.execute("SELECT* FROM activities")
+        self.tableWidget.setRowCount(0)
+        for row_number, row_data in enumerate(result):
+            self.tableWidget.insertRow(row_number)
+            for column_number, data in enumerate(row_data):
+                self.tableWidget.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+
+    def add_student(self):
+        self.close()
+        self.studWin = studentWin()
+        self.studWin.show()
+
+    def attendance(self):
+        self.close()
+        self.newWin = AttendanceWin()
+        self.newWin.show()
+
+    def home(self):
+        self.close()
+        self.newWin = MainWin()
+        self.newWin.show()
 
     def main(self):
         self.close()
